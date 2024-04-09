@@ -1,11 +1,15 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, UsePipes, ValidationPipe, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UsePipes, ValidationPipe, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { BoardStatus } from "./board-status.enum";
 import { Board } from './board.entity';
 import { BoardsService } from './boards.service';
 import { createBoardDto } from './dto/create-board.dto';
 import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
+import { AuthGuard } from '@nestjs/passport';
+import { GetUser } from 'src/auth/dto/get-user.decorator';
+import { User } from 'src/auth/user.entity';
 
 @Controller('boards')
+@UseGuards(AuthGuard())
 export class BoardsController {
     constructor(private boardsService: BoardsService) { }
     
@@ -15,8 +19,10 @@ export class BoardsController {
     // }
 
     @Get()
-    getAllBoard(): Promise<Board[]> {
-        return this.boardsService.getAllBoards();
+    getAllBoard(
+        @GetUser() user: User
+    ): Promise<Board[]> {
+        return this.boardsService.getAllBoards(user);
     }
 
     // @Post()
@@ -29,8 +35,9 @@ export class BoardsController {
 
     @Post()
     @UsePipes(ValidationPipe)
-    createBoard(@Body() createBoardDto: createBoardDto): Promise<Board> {
-        return this.boardsService.createBoard(createBoardDto);
+    createBoard(@Body() createBoardDto: createBoardDto,
+    @GetUser() user: User): Promise<Board> {
+        return this.boardsService.createBoard(createBoardDto, user);
     }
 
     @Get('/:id')
@@ -44,8 +51,10 @@ export class BoardsController {
     // }
 
     @Delete('/:id') 
-    deleteBoard(@Param('id', ParseIntPipe) id): Promise<void> {
-        return this.boardsService.deleteBoard(id);
+    deleteBoard(@Param('id', ParseIntPipe) id,
+    @GetUser() user:User
+    ): Promise<void> {
+        return this.boardsService.deleteBoard(id, user);
     }
     // @Delete('/:id')
     // deleteBoard(@Param('id') id: string): void {
