@@ -7,17 +7,28 @@ import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe'
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/dto/get-user.decorator';
 import { User } from 'src/auth/user.entity';
+import {
+    ApiBearerAuth, ApiBody,
+    ApiOperation, ApiTags,
+    ApiParam, ApiConsumes,
+    /* The `// @UseGuards(AuthGuard())` line is a commented-out code in the `test` method of the
+    `AuthController` class. */
+    ApiCreatedResponse
+} from '@nestjs/swagger';
 
+
+@ApiTags('Boards')//swagger에 tag를 생성해줌
 @Controller('boards')
 @UseGuards(AuthGuard())
+@ApiBearerAuth('access-token')
 export class BoardsController {
     constructor(private boardsService: BoardsService) { }
-    
+
     // @Get('/')
     // getAllBoard(): Board[] {
     //     return this.boardsService.getAllBoards();
     // }
-
+    @ApiOperation({ summary: '모든 게시물 목록보기' }) // api 설명
     @Get()
     getAllBoard(
         @GetUser() user: User
@@ -32,27 +43,59 @@ export class BoardsController {
     // ): Board {
     //     return this.boardsService.createBoard(createBoardDto);
     // }
-
     @Post()
+    @ApiOperation({
+        summary: '게시물 작성',
+        description: '게시판 생성 API',
+    })
+    @ApiConsumes('application/x-www-form-urlencoded')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                title: {
+                    type: 'string',
+                    description: "제목"
+                },
+                description: {
+                    type: 'string',
+                    description: "내용"
+                },
+            },
+        },
+    })
+    @ApiCreatedResponse({
+        description: '성공여부',
+        schema: {
+            example: { success: true },
+        },
+    })
+
     @UsePipes(ValidationPipe)
     createBoard(@Body() createBoardDto: createBoardDto,
-    @GetUser() user: User): Promise<Board> {
+        @GetUser() user: User): Promise<Board> {
         return this.boardsService.createBoard(createBoardDto, user);
     }
 
+    @ApiOperation({ summary: 'ID로 특정 게시물 읽기' })
     @Get('/:id')
-    getBoardById(@Param('id') id:number) : Promise<Board> {
+    getBoardById(@Param('id') id: number): Promise<Board> {
         return this.boardsService.getBoardById(id);
     }
-    
+
     // @Get('/:id')
     // getBoardById(@Param('id') id: string): Board {
     //     return this.boardsService.getBoardById(id)
     // }
 
-    @Delete('/:id') 
+    @Delete('/:id')
+    @ApiOperation({ summary: 'ID로 특정 게시물 삭제하기' })
+    @ApiParam({
+        name: 'id',
+        type: 'number',
+    })
     deleteBoard(@Param('id', ParseIntPipe) id,
-    @GetUser() user:User
+        @GetUser() user: User
     ): Promise<void> {
         return this.boardsService.deleteBoard(id, user);
     }
@@ -62,12 +105,29 @@ export class BoardsController {
     // }
 
 
+
     @Patch('/:id/status')
+    @ApiOperation({
+        summary: 'ID로 특정 게시물의 상태 업데이트',
+        description: 'default public -> private 로 변경가능 '
+    })
+    @ApiConsumes('application/x-www-form-urlencoded')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                status: {
+                    type: 'string',
+                    description: "private or public",
+                    enum: ['private', 'public']
+                },
+            },
+        },
+    })
     updateBoardStatus(
         @Param('id', ParseIntPipe) id: number,
-        @Body('status', BoardStatusValidationPipe) status: BoardStatus,
+        @Body('status', BoardStatusValidationPipe) status: BoardStatus
     ) {
         return this.boardsService.updateBoardStatus(id, status);
     }
-
 }
