@@ -32,7 +32,6 @@ export class AuthController {
             },
         },
     })
-
     signUp(@Body(ValidationPipe) authcredentialsDto: AuthCredentialsDto): Promise<void> {
         return this.authService.signUp(authcredentialsDto);
     }
@@ -62,6 +61,10 @@ export class AuthController {
     @Post('/test')
     @UseGuards(AuthGuard())
     @ApiBearerAuth('access-token')
+    @ApiOperation({
+        summary: '유저정보 가져오기',
+        description: 'Passport, Jwt 이용해서 토큰 인증 후 유저 정보 가져오기 '
+    })
     test(@GetUser() user: User) {
         console.log('user', user);
     }
