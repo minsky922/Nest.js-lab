@@ -20,7 +20,7 @@ import {
 @ApiTags('Boards')//swagger에 tag를 생성해줌
 @Controller('boards')
 @UseGuards(AuthGuard())
-@ApiBearerAuth('access-token')
+@ApiBearerAuth('access-token') //인증추가 
 export class BoardsController {
     constructor(private boardsService: BoardsService) { }
 
@@ -111,7 +111,7 @@ export class BoardsController {
         summary: 'ID로 특정 게시물의 상태 업데이트',
         description: 'default public -> private 로 변경가능 '
     })
-    @ApiConsumes('application/x-www-form-urlencoded')
+    @ApiConsumes('application/x-www-form-urlencoded') // form 형식(postman 처럼)
     @ApiBody({
         schema: {
             type: 'object',
