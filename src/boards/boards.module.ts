@@ -7,11 +7,11 @@ import { AuthModule } from 'src/auth/auth.module';
 // import { BoardRepository } from './board.repository';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([Board]),
-        AuthModule
-    ],
+  imports: [
+    TypeOrmModule.forFeature([Board]),//엔티티 등록
+    AuthModule
+  ],
   controllers: [BoardsController],
   providers: [BoardsService]
 })
-export class BoardsModule {}
+export class BoardsModule { }

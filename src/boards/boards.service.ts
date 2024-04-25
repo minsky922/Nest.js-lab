@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './board.entity'
 import { Repository } from 'typeorm';
 import { User } from 'src/auth/user.entity';
+import { promises } from 'dns';
 // import { v1 as uuid } from 'uuid';
 
 // repository pattern을 적용하지 않고 service에서 db로직 처리
